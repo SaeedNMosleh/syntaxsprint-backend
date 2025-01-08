@@ -4,13 +4,13 @@
   "description": "Express.js based backend for syntaxsprint",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "build": "npm install"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "express": "^4.21.2"
-    
   },
   "type": "module"
 }

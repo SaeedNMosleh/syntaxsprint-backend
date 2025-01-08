@@ -58,3 +58,4 @@ build/Release/
 
 # Windows
 Thumbs.db
+.vercel
