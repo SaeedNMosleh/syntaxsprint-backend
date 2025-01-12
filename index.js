@@ -3,8 +3,12 @@ Two API Endpoints are created in this file to load and save the data for leaderb
 */
 
 import express from 'express';
+import cors from 'cors';
 
 const app = express();
+
+// Enable CORS
+app.use(cors());
 
 // Middleware to parse JSON request bodies
 app.use(express.json());
