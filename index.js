@@ -13,8 +13,12 @@ dotenv.config();
 
 const app = express();
 
-// Enable CORS
-app.use(cors());
+// Enable CORS with specific options
+app.use(cors({
+    origin: ['https://syntaxsprint-app.vercel.app', 'http://localhost:3000'],
+    methods: ['GET', 'POST'],
+    credentials: true
+}));
 
 // Middleware to parse JSON request bodies
 app.use(express.json());
