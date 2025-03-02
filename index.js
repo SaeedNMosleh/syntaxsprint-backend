@@ -4,6 +4,12 @@ Two API Endpoints are created in this file to load and save the data for leaderb
 
 import express from 'express';
 import cors from 'cors';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import Leaderboard from './models/Leaderboard.js';
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 
@@ -13,41 +19,48 @@ app.use(cors());
 // Middleware to parse JSON request bodies
 app.use(express.json());
 
-// In-memory array to store leaderboard data
-let leaderboardData = [
-    {"name": "John", "score": 42},
-    {"name": "Jane", "score": 35},
-    {"name": "Jim", "score": 30},
-    {"name": "Jill", "score": 25},
-    {"name": "Jack", "score": 20},
-];
+// Connect to MongoDB
+const MONGODB_URI = process.env.MONGODB_URI.replace('<db_password>', process.env.DB_PASSWORD);
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('Could not connect to MongoDB:', err));
 
 // Function to get leaderboard data
-const getLeaderboardData = () => {
-    return leaderboardData;
+const getLeaderboardData = async () => {
+    return await Leaderboard.find().sort({ score: -1 });
 };
 
 // Function to save leaderboard data
-const saveLeaderboardData = (data) => {
-    leaderboardData = data;
+const saveLeaderboardData = async (data) => {
+    // Clear existing records
+    await Leaderboard.deleteMany({});
+    // Insert new records
+    await Leaderboard.insertMany(data);
 };
 
-app.get('/getleaderboard', (req, res) => {
-    // Load the leaderboard data from the in-memory array
-    const data = getLeaderboardData();
-    res.json(data);
+app.get('/getleaderboard', async (req, res) => {
+    try {
+        // Load the leaderboard data from MongoDB
+        const data = await getLeaderboardData();
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Error fetching leaderboard data' });
+    }
 });
 
 app.get('/', (req, res) => {
-    
     res.send("SyntaxSprint Backend API is running successfully");
 });
 
-app.post('/saveleaderboard', (req, res) => {
-    // Save the leaderboard data to the in-memory array
-    const data = req.body;
-    saveLeaderboardData(data);
-    res.send('Leaderboard data saved successfully');
+app.post('/saveleaderboard', async (req, res) => {
+    try {
+        // Save the leaderboard data to MongoDB
+        const data = req.body;
+        await saveLeaderboardData(data);
+        res.send('Leaderboard data saved successfully');
+    } catch (error) {
+        res.status(500).json({ error: 'Error saving leaderboard data' });
+    }
 });
 
 // Export the app for Vercel
